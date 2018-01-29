@@ -1,4 +1,5 @@
 ﻿using LandonAPI.Models;
+using LandonAPI.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -9,24 +10,38 @@ namespace LandonAPI
 {
     public static class DbInitializer
     {
-        public static void Initialize(HotelApiContext context)
+        public static void Initialize(HotelApiContext context, IDateLogicService dateLogicService)
         {
             context.Database.EnsureCreated();
 
             if (context.Rooms.Any()) return;
 
-            context.Rooms.Add(new RoomEntity
+            var oxford = context.Rooms.Add(new RoomEntity
             {
                 Id = Guid.Parse("301df04d-8679-4b1b-ab92-0a586ae53d08"),
                 Name = "Oxford Suite",
                 Rate = 10119
-            });
+            }).Entity;
 
             context.Rooms.Add(new RoomEntity
             {
                 Id = Guid.Parse("ee2b83be-91db-4de5-8122-35a9e9195976"),
                 Name = "Driscoll Suite",
                 Rate = 23959
+            });
+
+            var today = DateTimeOffset.Now;
+            var start = dateLogicService.AlignStartTime(today);
+            var end = start.Add(dateLogicService.GetMinimumStay());
+
+            context.Bookings.Add(new BookingEntity
+            {
+                Id = Guid.Parse("2eac8dea-2749-42b3-9d21-8eb2fc0fd6bd"),
+                Room = oxford,
+                CreatedAt = DateTimeOffset.UtcNow,
+                StartAt = start,
+                EndAt = end,
+                Total = oxford.Rate,
             });
 
             context.SaveChanges();
@@ -40,7 +55,8 @@ namespace LandonAPI
                 try
                 {
                     var context = services.GetRequiredService<HotelApiContext>();
-                    Initialize(context);
+                    var dateLogicService = services.GetRequiredService<IDateLogicService>();
+                    Initialize(context, dateLogicService);
                 }
                 catch (Exception ex)
                 {

@@ -9,10 +9,7 @@ namespace LandonAPI.Controllers
     {
         private HotelInfo _hotelInfo;
 
-        public InfoController(IOptions<HotelInfo> hotelInfoAccessor)
-        {
-            _hotelInfo = hotelInfoAccessor.Value;
-        }
+        public InfoController(IOptions<HotelInfo> hotelInfoAccessor) => _hotelInfo = hotelInfoAccessor.Value;
 
         [HttpGet(Name = nameof(GetInfo))]
         public IActionResult GetInfo()

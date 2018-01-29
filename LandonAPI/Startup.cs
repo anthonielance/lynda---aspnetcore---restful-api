@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using System.Linq;
 
 namespace LandonAPI
@@ -56,6 +57,13 @@ namespace LandonAPI
                 var jsonFormatter = opt.OutputFormatters.OfType<JsonOutputFormatter>().Single();
                 opt.OutputFormatters.Remove(jsonFormatter);
                 opt.OutputFormatters.Add(new IonOutputFormatter(jsonFormatter));
+            })
+            .AddJsonOptions(opt =>
+            {
+                // These should be the defaults, but we can be explicit
+                opt.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
+                opt.SerializerSettings.DateFormatHandling = DateFormatHandling.IsoDateFormat;
+                opt.SerializerSettings.DateParseHandling = DateParseHandling.DateTimeOffset;
             });
             services.AddRouting(opt => opt.LowercaseUrls = true);
 
@@ -68,8 +76,14 @@ namespace LandonAPI
                 opt.ApiVersionSelector = new CurrentImplementationApiVersionSelector(opt);
             });
 
+            services.Configure<HotelOptions>(Configuration);
             services.Configure<HotelInfo>(Configuration.GetSection("Info"));
+            services.Configure<PagingOptions>(Configuration.GetSection("DefaultPagingOptions"));
+
             services.AddScoped<IRoomService, DefaultRoomService>();
+            services.AddScoped<IOpeningService, DefaultOpeningService>();
+            services.AddScoped<IBookingService, DefaultBookingService>();
+            services.AddScoped<IDateLogicService, DefaultDateLogicService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

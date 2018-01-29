@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using LandonAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,5 +25,8 @@ namespace LandonAPI.Services
 
             return Mapper.Map<Room>(entity);
         }
+
+        public async Task<IEnumerable<Room>> GetRoomsAsync(CancellationToken ct)
+            => await _context.Rooms.ProjectTo<Room>().ToArrayAsync();
     }
 }
