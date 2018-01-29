@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using LandonAPI.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace LandonAPI.Controllers
 {
@@ -9,11 +10,11 @@ namespace LandonAPI.Controllers
         [HttpGet(Name = nameof(GetRoot))]
         public IActionResult GetRoot()
         {
-            var response = new
+            var response = new RootResponse
             {
-                href = Url.Link(nameof(GetRoot), null),
-                rooms = new { href = Url.Link(nameof(RoomsController.GetRooms), null) },
-                info = new { href = Url.Link(nameof(InfoController.GetInfo), null) }
+                Self = Link.To(nameof(GetRoot), null),
+                Rooms = Link.To(nameof(RoomsController.GetRooms)),
+                Info = Link.To(nameof(InfoController.GetInfo))
             };
 
             return Ok(response);

@@ -48,6 +48,8 @@ namespace LandonAPI
             services.AddMvc(opt =>
             {
                 opt.Filters.Add(typeof(JsonExceptionFilter));
+                opt.Filters.Add(typeof(LinkRewritingFilter));
+
                 opt.SslPort = _httpsPort;
                 opt.Filters.Add(typeof(RequireHttpsAttribute));
 
