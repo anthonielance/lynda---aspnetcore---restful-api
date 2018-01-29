@@ -18,9 +18,21 @@ namespace LandonAPI
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        private readonly int? _httpsPort;
+
+        public Startup(IConfiguration configuration, IHostingEnvironment env)
         {
             Configuration = configuration;
+
+            if (env.IsDevelopment())
+            {
+                var launchJsonConfig = new ConfigurationBuilder()
+                    .SetBasePath(env.ContentRootPath)
+                    .AddJsonFile("Properties\\launchSettings.json")
+                    .Build();
+
+                _httpsPort = launchJsonConfig.GetValue<int>("iisSettings:iisExpress:sslPort");
+            }
         }
 
         public IConfiguration Configuration { get; }
@@ -31,6 +43,8 @@ namespace LandonAPI
             services.AddMvc(opt =>
             {
                 opt.Filters.Add(typeof(JsonExceptionFilter));
+                opt.SslPort = _httpsPort;
+                opt.Filters.Add(typeof(RequireHttpsAttribute));
 
                 var jsonFormatter = opt.OutputFormatters.OfType<JsonOutputFormatter>().Single();
                 opt.OutputFormatters.Remove(jsonFormatter);
@@ -56,6 +70,12 @@ namespace LandonAPI
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseHsts(opt =>
+            {
+                opt.MaxAge(days: 180);
+                opt.IncludeSubdomains();
+                opt.Preload();
+            });
             app.UseMvc();
         }
     }
