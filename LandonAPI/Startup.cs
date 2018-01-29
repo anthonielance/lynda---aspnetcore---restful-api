@@ -1,18 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using AutoMapper;
 using LandonAPI.Filters;
 using LandonAPI.Infrastructure;
+using LandonAPI.Models;
+using LandonAPI.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc.Versioning;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+using System.Linq;
 
 namespace LandonAPI
 {
@@ -40,6 +39,12 @@ namespace LandonAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // Use an in-memory database for quick dev and testing
+            // TODO: Swap out with a real database in production
+            services.AddDbContext<HotelApiContext>(opt => opt.UseInMemoryDatabase("HotelApi"));
+
+            services.AddAutoMapper();
+
             services.AddMvc(opt =>
             {
                 opt.Filters.Add(typeof(JsonExceptionFilter));
@@ -60,6 +65,9 @@ namespace LandonAPI
                 opt.DefaultApiVersion = new ApiVersion(1, 0);
                 opt.ApiVersionSelector = new CurrentImplementationApiVersionSelector(opt);
             });
+
+            services.Configure<HotelInfo>(Configuration.GetSection("Info"));
+            services.AddScoped<IRoomService, DefaultRoomService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
