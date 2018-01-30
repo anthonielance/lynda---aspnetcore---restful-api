@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace LandonAPI.Controllers
 {
+    [Route("/[controller]")]
     public class BookingsController : Controller
     {
         private IBookingService _bookingService;

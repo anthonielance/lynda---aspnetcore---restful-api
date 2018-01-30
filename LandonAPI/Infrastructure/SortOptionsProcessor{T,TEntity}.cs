@@ -53,6 +53,7 @@ namespace LandonAPI.Infrastructure
                 yield return new SortTerm
                 {
                     Name = declaredTerm.Name,
+                    EntityName = declaredTerm.EntityName,
                     Descending = term.Descending,
                     Default = declaredTerm.Default
                 };
@@ -63,7 +64,7 @@ namespace LandonAPI.Infrastructure
             => typeof(T).GetTypeInfo()
             .DeclaredProperties
             .Where(p => p.GetCustomAttributes<SortableAttribute>().Any())
-            .Select(p => new SortTerm { Name = p.Name, Default = p.GetCustomAttribute<SortableAttribute>().Default });
+            .Select(p => new SortTerm { Name = p.Name, EntityName = p.GetCustomAttribute<SortableAttribute>().EntityProperty, Default = p.GetCustomAttribute<SortableAttribute>().Default });
 
         public IQueryable<TEntity> Apply(IQueryable<TEntity> query)
         {
@@ -80,7 +81,7 @@ namespace LandonAPI.Infrastructure
             foreach (var term in terms)
             {
                 var propertyInfo = ExpressionHelper
-                    .GetPropertyInfo<TEntity>(term.Name);
+                    .GetPropertyInfo<TEntity>(term.EntityName ?? term.Name);
                 var obj = ExpressionHelper.Parameter<TEntity>();
 
                 // Build the LINQ expression backwards

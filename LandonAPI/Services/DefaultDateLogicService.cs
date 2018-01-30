@@ -7,7 +7,7 @@ namespace LandonAPI.Services
 {
     public class DefaultDateLogicService : IDateLogicService
     {
-        private HotelOptions _hotelOptions;
+        private readonly HotelOptions _hotelOptions;
 
         public DefaultDateLogicService(IOptions<HotelOptions> optionsAccessor)
             => _hotelOptions = optionsAccessor.Value;

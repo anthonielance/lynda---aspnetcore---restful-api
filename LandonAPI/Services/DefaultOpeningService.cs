@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using LandonAPI.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,8 +13,8 @@ namespace LandonAPI.Services
 {
     public class DefaultOpeningService : IOpeningService
     {
-        private HotelApiContext _context;
-        private IDateLogicService _dateLogicService;
+        private readonly HotelApiContext _context;
+        private readonly IDateLogicService _dateLogicService;
 
         public DefaultOpeningService(HotelApiContext context, IDateLogicService dateLogicService)
         {
@@ -21,11 +22,11 @@ namespace LandonAPI.Services
             _dateLogicService = dateLogicService;
         }
 
-        public async Task<PagedResults<Opening>> GetOpeningsAsync(PagingOptions pagingOptions, CancellationToken ct)
+        public async Task<PagedResults<Opening>> GetOpeningsAsync(PagingOptions pagingOptions, SortOptions<Opening, OpeningEntity> sortOptions, CancellationToken ct)
         {
             var rooms = await _context.Rooms.ToArrayAsync();
 
-            var allOpenings = new List<Opening>();
+            var allOpenings = new List<OpeningEntity>();
 
             foreach(var room in rooms)
             {
@@ -50,20 +51,26 @@ namespace LandonAPI.Services
                         Rate = room.Rate,
                         StartAt = slot.StartAt,
                         EndAt = slot.EndAt
-                    })
-                    .Select(model => Mapper.Map<Opening>(model));
+                    });
 
                 allOpenings.AddRange(openings);
             }
 
-            var pagedOpenings = allOpenings
+            var pseudoQuery = allOpenings.AsQueryable();
+            pseudoQuery = sortOptions.Apply(pseudoQuery);
+
+            var size = pseudoQuery.Count();
+
+            var items = pseudoQuery
                 .Skip(pagingOptions.Offset.Value)
-                .Take(pagingOptions.Limit.Value);
+                .Take(pagingOptions.Limit.Value)
+                .ProjectTo<Opening>()
+                .ToArray();
 
             return new PagedResults<Opening>
             {
-                Items = pagedOpenings,
-                TotalSize = allOpenings.Count()
+                Items = items,
+                TotalSize = size
             };
         }
 

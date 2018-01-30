@@ -9,8 +9,8 @@ namespace LandonAPI.Services
 {
     public class DefaultBookingService : IBookingService
     {
-        private HotelApiContext _context;
-        private IDateLogicService _dateLogicService;
+        private readonly HotelApiContext _context;
+        private readonly IDateLogicService _dateLogicService;
 
         public DefaultBookingService(HotelApiContext context, IDateLogicService dateLogicService)
         {
