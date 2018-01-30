@@ -9,5 +9,6 @@ namespace LandonAPI.Services
     {
         Task<Booking> GetBookingAsync(Guid bookingId, CancellationToken ct);
         Task<Guid> CreateBookingAsync(Guid userId, Guid roomId, DateTimeOffset startAt, DateTimeOffset endAt, CancellationToken ct);
+        Task DeleteBookingAsync(Guid bookingId, CancellationToken ct);
     }
 }

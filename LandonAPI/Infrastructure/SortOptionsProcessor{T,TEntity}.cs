@@ -64,7 +64,12 @@ namespace LandonAPI.Infrastructure
             => typeof(T).GetTypeInfo()
             .DeclaredProperties
             .Where(p => p.GetCustomAttributes<SortableAttribute>().Any())
-            .Select(p => new SortTerm { Name = p.Name, EntityName = p.GetCustomAttribute<SortableAttribute>().EntityProperty, Default = p.GetCustomAttribute<SortableAttribute>().Default });
+            .Select(p => new SortTerm
+            {
+                Name = p.Name,
+                EntityName = p.GetCustomAttribute<SortableAttribute>().EntityProperty,
+                Default = p.GetCustomAttribute<SortableAttribute>().Default
+            });
 
         public IQueryable<TEntity> Apply(IQueryable<TEntity> query)
         {

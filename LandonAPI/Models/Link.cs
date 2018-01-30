@@ -6,6 +6,7 @@ namespace LandonAPI.Models
     public class Link
     {
         public const string GetMethod = "GET";
+        public const string PostMethod = "POST";
 
         public static Link To(string routeName, object routeValues = null) => new Link
         {
@@ -21,6 +22,14 @@ namespace LandonAPI.Models
             RouteValues = routeValues,
             Method = GetMethod,
             Relations = new string[] { "collection" }
+        };
+
+        public static Link ToForm(string routeName, object routeValues = null, string method = PostMethod, params string[] relations) => new Link
+        {
+            RouteName = routeName,
+            RouteValues = routeValues,
+            Method = method,
+            Relations = relations
         };
 
         [JsonProperty(Order = -4)]

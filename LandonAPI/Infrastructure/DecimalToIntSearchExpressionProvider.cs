@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 
 namespace LandonAPI.Infrastructure
 {
-    public class DecimalToIntSearchExpressionProvider : DefaultSearchExpressionProvider
+    public class DecimalToIntSearchExpressionProvider : ComparableSearchExpressionProvider
     {
         public override ConstantExpression GetValue(string input)
         {
@@ -15,19 +15,6 @@ namespace LandonAPI.Infrastructure
             var justDigits = (int)(dec * (decimal)Math.Pow(10, places));
 
             return Expression.Constant(justDigits);
-        }
-
-        public override Expression GetComparison(MemberExpression left, string op, ConstantExpression right)
-        {
-            switch (op.ToLower())
-            {
-                case "gt": return Expression.GreaterThan(left, right);
-                case "gte": return Expression.GreaterThanOrEqual(left, right);
-                case "lt": return Expression.LessThan(left, right);
-                case "lte": return Expression.LessThanOrEqual(left, right);
-
-                default: return base.GetComparison(left, op, right);
-            }
         }
     }
 }
