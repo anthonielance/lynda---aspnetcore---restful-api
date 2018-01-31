@@ -76,7 +76,9 @@ namespace LandonAPI.Infrastructure
             var terms = GetValidTerms().ToArray();
             if (!terms.Any())
             {
-                terms = GetTermsFromModel().Where(t => t.Default).ToArray();
+                terms = GetTermsFromModel()
+                    .Where(t => t.Default)
+                    .ToArray();
             }
             if (!terms.Any()) return query;
 
@@ -85,8 +87,7 @@ namespace LandonAPI.Infrastructure
 
             foreach (var term in terms)
             {
-                var propertyInfo = ExpressionHelper
-                    .GetPropertyInfo<TEntity>(term.EntityName ?? term.Name);
+                var propertyInfo = ExpressionHelper.GetPropertyInfo<TEntity>(term.EntityName ?? term.Name);
                 var obj = ExpressionHelper.Parameter<TEntity>();
 
                 // Build the LINQ expression backwards

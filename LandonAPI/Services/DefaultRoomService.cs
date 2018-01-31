@@ -15,7 +15,9 @@ namespace LandonAPI.Services
 
         public DefaultRoomService(HotelApiContext context) => _context = context;
 
-        public async Task<Room> GetRoomAsync(Guid id, CancellationToken ct)
+        public async Task<Room> GetRoomAsync(
+            Guid id,
+            CancellationToken ct)
         {
             var entity =  await _context.Rooms.SingleOrDefaultAsync(r => r.Id == id, ct);
             if (entity == null) return null;

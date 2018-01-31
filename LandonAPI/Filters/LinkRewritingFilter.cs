@@ -14,12 +14,9 @@ namespace LandonAPI.Filters
 {
     public class LinkRewritingFilter : IAsyncResultFilter
     {
-        private IUrlHelperFactory _urlHelperFactory;
+        private readonly IUrlHelperFactory _urlHelperFactory;
 
-        public LinkRewritingFilter(IUrlHelperFactory urlHelperFactory)
-        {
-            _urlHelperFactory = urlHelperFactory;
-        }
+        public LinkRewritingFilter(IUrlHelperFactory urlHelperFactory) => _urlHelperFactory = urlHelperFactory;
 
         public async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
         {

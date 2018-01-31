@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
+﻿using AutoMapper.QueryableExtensions;
 using LandonAPI.Models;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace LandonAPI.Services
 {
@@ -22,7 +20,11 @@ namespace LandonAPI.Services
             _dateLogicService = dateLogicService;
         }
 
-        public async Task<PagedResults<Opening>> GetOpeningsAsync(PagingOptions pagingOptions, SortOptions<Opening, OpeningEntity> sortOptions, CancellationToken ct)
+        public async Task<PagedResults<Opening>> GetOpeningsAsync(
+            PagingOptions pagingOptions,
+            SortOptions<Opening, OpeningEntity> sortOptions,
+            SearchOptions<Opening, OpeningEntity> searchOptions,
+            CancellationToken ct)
         {
             var rooms = await _context.Rooms.ToArrayAsync();
 
@@ -57,6 +59,7 @@ namespace LandonAPI.Services
             }
 
             var pseudoQuery = allOpenings.AsQueryable();
+            pseudoQuery = searchOptions.Apply(pseudoQuery);
             pseudoQuery = sortOptions.Apply(pseudoQuery);
 
             var size = pseudoQuery.Count();
@@ -74,7 +77,11 @@ namespace LandonAPI.Services
             };
         }
 
-        public async Task<IEnumerable<BookingRange>> GetConflictingSlots(Guid roomId, DateTimeOffset start, DateTimeOffset end, CancellationToken ct)
+        public async Task<IEnumerable<BookingRange>> GetConflictingSlots(
+            Guid roomId,
+            DateTimeOffset start,
+            DateTimeOffset end,
+            CancellationToken ct)
         {
             return await _context.Bookings
                 .Where(b => b.Room.Id == roomId && _dateLogicService.DoesConflict(b, start, end))

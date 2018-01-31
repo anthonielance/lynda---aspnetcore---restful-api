@@ -8,12 +8,11 @@ namespace LandonAPI.Infrastructure
 {
     public class IonOutputFormatter : TextOutputFormatter
     {
-        private JsonOutputFormatter _jsonOutputFormatter;
+        private readonly JsonOutputFormatter _jsonOutputFormatter;
 
         public IonOutputFormatter(JsonOutputFormatter jsonOutputFormatter)
         {
-            if (jsonOutputFormatter == null) throw new ArgumentNullException(nameof(jsonOutputFormatter));
-            _jsonOutputFormatter = jsonOutputFormatter;
+            _jsonOutputFormatter = jsonOutputFormatter ?? throw new ArgumentNullException(nameof(jsonOutputFormatter));
 
             SupportedMediaTypes.Add(new MediaTypeHeaderValue("application/ion+json"));
             SupportedEncodings.Add(Encoding.UTF8);

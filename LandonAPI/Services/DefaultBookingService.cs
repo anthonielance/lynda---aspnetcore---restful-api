@@ -18,7 +18,12 @@ namespace LandonAPI.Services
             _dateLogicService = dateLogicService;
         }
 
-        public async Task<Guid> CreateBookingAsync(Guid userId, Guid roomId, DateTimeOffset startAt, DateTimeOffset endAt, CancellationToken ct)
+        public async Task<Guid> CreateBookingAsync(
+            Guid userId,
+            Guid roomId,
+            DateTimeOffset startAt,
+            DateTimeOffset endAt,
+            CancellationToken ct)
         {
             var room = await _context.Rooms.SingleOrDefaultAsync(r => r.Id == roomId, ct);
             if (room == null) throw new ArgumentException("Invalid room id.");

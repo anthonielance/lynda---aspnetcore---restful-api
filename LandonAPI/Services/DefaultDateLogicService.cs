@@ -24,7 +24,9 @@ namespace LandonAPI.Services
             return new DateTimeOffset(dateInServerOffset.Year, dateInServerOffset.Month, dateInServerOffset.Day, 12, 00, 00, dateInServerOffset.Offset);
         }
 
-        public IEnumerable<BookingRange> GetAllSlots(DateTimeOffset start, DateTimeOffset? end = null)
+        public IEnumerable<BookingRange> GetAllSlots(
+            DateTimeOffset start,
+            DateTimeOffset? end = null)
         {
             var newStart = AlignStartTime(start);
 

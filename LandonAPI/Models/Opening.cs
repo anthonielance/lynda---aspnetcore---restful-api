@@ -16,5 +16,7 @@ namespace LandonAPI.Models
 
         [Sortable]
         public decimal Rate { get; set; }
+
+        public Form Book { get; set; }
     }
 }

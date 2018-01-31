@@ -5,12 +5,9 @@ namespace LandonAPI.Infrastructure
 {
     public class LinkRewriter
     {
-        private IUrlHelper _urlHelper;
+        private readonly IUrlHelper _urlHelper;
 
-        public LinkRewriter(IUrlHelper urlHelper)
-        {
-            _urlHelper = urlHelper;
-        }
+        public LinkRewriter(IUrlHelper urlHelper) => _urlHelper = urlHelper;
 
         public Link Rewrite(Link original)
         {
