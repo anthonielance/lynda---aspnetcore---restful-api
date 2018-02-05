@@ -1,10 +1,12 @@
 ﻿using LandonAPI.Models;
 using LandonAPI.Services;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace LandonAPI
 {
@@ -47,6 +49,28 @@ namespace LandonAPI
             context.SaveChanges();
         }
 
+        public static async Task InitializeUsers(RoleManager<UserRoleEntity> roleManager, UserManager<UserEntity> userManager)
+        {
+            // Add a test role
+            await roleManager.CreateAsync(new UserRoleEntity("Admin"));
+
+            // Add a test user
+            var user = new UserEntity
+            {
+                Email = "admin@landon.local",
+                UserName = "admin@landon.local",
+                FirstName = "Admin",
+                LastName = "Testerman",
+                CreatedAt = DateTimeOffset.UtcNow
+            };
+
+            await userManager.CreateAsync(user,"Supersecret123!");
+
+            // Put the user in the admin role
+            await userManager.AddToRoleAsync(user, "Admin");
+            await userManager.UpdateAsync(user);
+        }
+
         public static IWebHost UseDatabaseInitializer(this IWebHost host)
         {
             using (var scope = host.Services.CreateScope())
@@ -54,6 +78,10 @@ namespace LandonAPI
                 var services = scope.ServiceProvider;
                 try
                 {
+                    var roleManager = services.GetRequiredService<RoleManager<UserRoleEntity>>();
+                    var userManager = services.GetRequiredService<UserManager<UserEntity>>();
+                    InitializeUsers(roleManager, userManager).Wait();
+
                     var context = services.GetRequiredService<HotelApiContext>();
                     var dateLogicService = services.GetRequiredService<IDateLogicService>();
                     Initialize(context, dateLogicService);

@@ -1,10 +1,13 @@
-﻿using AutoMapper;
+﻿using AspNet.Security.OAuth.Validation;
+using AspNet.Security.OpenIdConnect.Primitives;
+using AutoMapper;
 using LandonAPI.Filters;
 using LandonAPI.Infrastructure;
 using LandonAPI.Models;
 using LandonAPI.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc.Versioning;
@@ -12,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
+using System;
 using System.Linq;
 
 namespace LandonAPI
@@ -42,7 +46,42 @@ namespace LandonAPI
         {
             // Use an in-memory database for quick dev and testing
             // TODO: Swap out with a real database in production
-            services.AddDbContext<HotelApiContext>(opt => opt.UseInMemoryDatabase("HotelApi"));
+            services.AddDbContext<HotelApiContext>(opt =>
+            {
+                opt.UseInMemoryDatabase("HotelApi");
+                opt.UseOpenIddict();
+            });
+
+            // Map some of the default claim names to the proper OpenID Connect claim names
+            services.Configure<IdentityOptions>(opt =>
+            {
+                opt.ClaimsIdentity.UserNameClaimType = OpenIdConnectConstants.Claims.Name;
+                opt.ClaimsIdentity.UserIdClaimType = OpenIdConnectConstants.Claims.Subject;
+                opt.ClaimsIdentity.RoleClaimType = OpenIdConnectConstants.Claims.Role;
+            });
+
+            // Add OpenIddict services
+            services.AddOpenIddict<Guid>(opt =>
+            {
+                opt.AddEntityFrameworkCoreStores<HotelApiContext>();
+                opt.AddMvcBinders();
+
+                opt.EnableTokenEndpoint("/token");
+                opt.AllowPasswordFlow();
+                opt.DisableHttpsRequirement();
+            });
+
+            // Add ASP.NET Core Identity
+            services.AddIdentity<UserEntity, UserRoleEntity>()
+                .AddEntityFrameworkStores<HotelApiContext>()
+                .AddDefaultTokenProviders();
+
+            services.AddAuthentication(opt =>
+            {
+                opt.DefaultAuthenticateScheme = OAuthValidationDefaults.AuthenticationScheme;
+                opt.DefaultChallengeScheme = OAuthValidationDefaults.AuthenticationScheme;
+            })
+                .AddOAuthValidation();
 
             services.AddAutoMapper();
 
@@ -90,6 +129,13 @@ namespace LandonAPI
             services.AddScoped<IOpeningService, DefaultOpeningService>();
             services.AddScoped<IBookingService, DefaultBookingService>();
             services.AddScoped<IDateLogicService, DefaultDateLogicService>();
+            services.AddScoped<IUserService, DefaultUserService>();
+
+            services.AddAuthorization(opt =>
+            {
+                opt.AddPolicy("ViewAllUsersPolicy",
+                    p => p.RequireAuthenticatedUser().RequireRole("Admin"));
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -106,6 +152,9 @@ namespace LandonAPI
                 opt.IncludeSubdomains();
                 opt.Preload();
             });
+
+            app.UseAuthentication();
+
             app.UseResponseCaching();
             app.UseMvc();
         }

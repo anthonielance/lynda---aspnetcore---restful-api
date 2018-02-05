@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using LandonAPI.Models;
+using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
 
 namespace LandonAPI.Infrastructure
 {
@@ -29,6 +31,9 @@ namespace LandonAPI.Infrastructure
                     Link.To(nameof(Controllers.BookingsController.GetBookingByIdAsync),new { bookingId = src.Id })))
                 .ForMember(dest => dest.Room, opt => opt.MapFrom(src =>
                     Link.To(nameof(Controllers.RoomsController.GetRoomByIdAsync),new { roomId = src.Room.Id })));
+
+            CreateMap<UserEntity, User>()
+                .ForMember(dest => dest.Self, opt => opt.MapFrom(src => Link.To(nameof(Controllers.UsersController.GetUserByIdAsync), new { userId = src.Id })));
         }
     }
 }
